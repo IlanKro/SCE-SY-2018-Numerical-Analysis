@@ -133,32 +133,12 @@ class Matrix(object):
             [self.mat, self.b] = gauss_scalling(self.mat, self.b, i)
         x = solve(self.mat, self.b)  # solving triangular matrix.
         return x
-    def iterative_convergence(self,x,xI,tolerance):
-        """
-        checks if a loop using a vector as result needs to end or not calculating if 2 vectors are close enough, using their normals.
-        :param x: Previous x (xr)
-        :param xI: new x (xr+1)
-        :param tolerance: the tolerance factor of the iteration
-        :return: True if the iterative loop ended in success, False rhe loop needs to keep going.
-        """
-        diff1norm = 0.0
-        oldnorm = 0.0
-        for i in range(len(self.b)):
-            diff1norm = diff1norm + abs(x[i] - xI[i])
-            oldnorm = oldnorm + abs(xI[i])
-        if oldnorm == 0.0:
-            oldnorm = 1.0
-        norm = diff1norm / oldnorm
-        if (norm < tolerance):
-            return True
-        return False
-
 
     def iterative(self,method,max_iter=10000,tolerance=0.00001):
         """
         Calculates a solution for a matrix and a solution vector using 2 methods
         that can be choosen when the function is called
-        :param method: which method to use either "Jacobi" or "Gauss Seidel" are the only valid inputs
+        :param method: which method to use either "Jacovy" or "Gauss Seidel" are the only valid inputs
         :param max_iter: max number of iterations the default is 10000
         :param tolerance: tolerance of solution the default is 0.0001
         :return: either an error (in string) if something gone wrong an exception if the matrix ins't invertable,
@@ -170,59 +150,39 @@ class Matrix(object):
             H = inv(self.L + self.D)
             print("H:", H)
             return [G,H]
-        def Jacobi(self):
-            G =((-1 *inv(self.D)).dot(inv(self.L+self.U)))
+        def Yacovy(self):
+            G =(-1 *inv(self.D).dot(inv(self.L+self.U)))
             print("G:", G)
             H = inv(self.D)
             print("H:", H)
             return[G,H]
-        iteration_num = 0
+        iteration_num = max_iter
         x = np.zeros_like(self.b)
         x[0]=1
-        if (method=="Jacobi"):
-            [G,H]=Jacobi(self)
+        if (method=="Yacovy"):
+            [G,H]=Yacovy(self)
         elif (method == "Gauss Seidel"):
             [G,H]=gauss_seidel(self)
         else:
             return "Wrong input"
         xI=x
-        while (iteration_num!=max_iter):
+        while (iteration_num!=0):
             xI= G.dot(x)+H.dot(self.b)
-            iteration_num += 1
-            print(iteration_num,")",x)
-            if (Matrix.iterative_convergence(self,x,xI,tolerance)):
-                print("number of Iterations:",(iteration_num))
+
+            print(max_iter-iteration_num+1,")",x)
+            iteration_num -= 1
+            diff1norm = 0.0
+            oldnorm = 0.0
+            for i in range(len(self.b)):
+                diff1norm = diff1norm + abs(x[i] - xI[i])
+                oldnorm = oldnorm + abs(xI[i])
+            if oldnorm == 0.0:
+                oldnorm = 1.0
+            norm = diff1norm / oldnorm
+            if (norm < tolerance):
+                print("number of Iterations:",(max_iter-iteration_num))
                 return x
             x = xI
-            if x[0]>10e+33: #putting an upper limit so the solution doesn't go too high..
-                return "does not converge"
         return "does not converge"
-
-    def sor(self,w=1.5,max_iter=1000,tolerance=0.00001):
-        """
-        :param w: a variable between 0 and 2 (default is 1.5)
-        :param  max_iter maximum iterations the code can go up to 1000 by default.
-        :param tolerance: tolerance of solution the default is 0.0001
-        :return: the solution to a matrix.
-        """
-        if (w<=0 or w>=2):
-            return "Error, cannot initiate the function"
-        x=np.zeros_like(self.b)
-        x[0]=5  #don't want the initial vector to be all 0's but the actual guess doesn't matter much.
-        xI=x
-        iteration_num=0
-        while(iteration_num!=max_iter):
-            iteration_num+=1
-            xI=(inv((self.D + w*self.L)).dot((1-w)*self.D - w * self.U)).dot(x) + (w * inv((self.D + w*self.L)).dot(self.b))#the sor formula
-            print(iteration_num, ")", x)
-            if (Matrix.iterative_convergence(self,x, xI, tolerance)):
-                print("number of Iterations:", (iteration_num))
-                return x
-            x = xI
-            if x[0] > 10e+33:  # putting an upper limit so the loop doesn't go too high.. needlessly
-                return "does not converge"
-        return "does not converge"
-
-
 
 

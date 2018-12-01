@@ -134,13 +134,6 @@ class Matrix(object):
         x = solve(self.mat, self.b)  # solving triangular matrix.
         return x
     def iterative_convergence(self,x,xI,tolerance):
-        """
-        checks if a loop using a vector as result needs to end or not calculating if 2 vectors are close enough, using their normals.
-        :param x: Previous x (xr)
-        :param xI: new x (xr+1)
-        :param tolerance: the tolerance factor of the iteration
-        :return: True if the iterative loop ended in success, False rhe loop needs to keep going.
-        """
         diff1norm = 0.0
         oldnorm = 0.0
         for i in range(len(self.b)):
@@ -171,7 +164,7 @@ class Matrix(object):
             print("H:", H)
             return [G,H]
         def Jacobi(self):
-            G =((-1 *inv(self.D)).dot(inv(self.L+self.U)))
+            G =(-1 *inv(self.D).dot(inv(self.L+self.U)))
             print("G:", G)
             H = inv(self.D)
             print("H:", H)
@@ -190,12 +183,18 @@ class Matrix(object):
             xI= G.dot(x)+H.dot(self.b)
             iteration_num += 1
             print(iteration_num,")",x)
-            if (Matrix.iterative_convergence(self,x,xI,tolerance)):
+            diff1norm = 0.0
+            oldnorm = 0.0
+            for i in range(len(self.b)):
+                diff1norm = diff1norm + abs(x[i] - xI[i])
+                oldnorm = oldnorm + abs(xI[i])
+            if oldnorm == 0.0:
+                oldnorm = 1.0
+            norm = diff1norm / oldnorm
+            if (norm < tolerance):
                 print("number of Iterations:",(iteration_num))
                 return x
             x = xI
-            if x[0]>10e+33: #putting an upper limit so the solution doesn't go too high..
-                return "does not converge"
         return "does not converge"
 
     def sor(self,w=1.5,max_iter=1000,tolerance=0.00001):
@@ -208,21 +207,33 @@ class Matrix(object):
         if (w<=0 or w>=2):
             return "Error, cannot initiate the function"
         x=np.zeros_like(self.b)
-        x[0]=5  #don't want the initial vector to be all 0's but the actual guess doesn't matter much.
+        x[0]=5 #don't want the initial vector to be all 0's but the actual guess doesn't matter much.
         xI=x
         iteration_num=0
         while(iteration_num!=max_iter):
             iteration_num+=1
             xI=(inv((self.D + w*self.L)).dot((1-w)*self.D - w * self.U)).dot(x) + (w * inv((self.D + w*self.L)).dot(self.b))#the sor formula
             print(iteration_num, ")", x)
-            if (Matrix.iterative_convergence(self,x, xI, tolerance)):
+            diff1norm = 0.0
+            oldnorm = 0.0
+            for i in range(len(self.b)):
+                diff1norm = diff1norm + abs(x[i] - xI[i])
+                oldnorm = oldnorm + abs(xI[i])
+            if oldnorm == 0.0:
+                oldnorm = 1.0
+            norm = diff1norm / oldnorm
+            if (norm < tolerance):
                 print("number of Iterations:", (iteration_num))
                 return x
             x = xI
-            if x[0] > 10e+33:  # putting an upper limit so the loop doesn't go too high.. needlessly
-                return "does not converge"
         return "does not converge"
 
 
 
+
+
+A=Matrix([[1,0,0],[0,1,0],[0,0,1]],[1,0,3])
+print(A.cond())
+#print(A.gauss_elemination())
+print(A.sor())
 
