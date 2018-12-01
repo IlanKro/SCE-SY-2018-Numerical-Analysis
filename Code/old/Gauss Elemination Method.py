@@ -2,7 +2,10 @@ import numpy as np
 from numpy.linalg import inv
 from scipy.linalg import solve_triangular as solve
 def make_matrix(A):
-    """Makes a desired matrix to work with numpy"""
+    """
+    :param A: a collection in matrix form
+    :return: narray from numpay (allows usage of numpy functions)
+    """
     return np.array(A)
 
 def cond(A):
@@ -21,10 +24,10 @@ def cond(A):
             sum=0
        return maxSum
     return normal(A) * normal(inv(A))
-def check_singularity(A):
-    """Checks if a matrix is singular or not
+def check_invertible(A):
+    """Checks if a matrix is invertible or not
         :param: A the matrix to check
-        :return: boolean:True if it's invertuible or False if it's singular
+        :return: boolean:True if it's invertible or False if it's singular
     """
     try:
         inv(A)
@@ -83,7 +86,7 @@ def gauss_elemination_method(A,b):
         [A, b] = biggest_value_swap(A, b, i, i)
         print('A:\n{0},\nb:{1}'.format(A, b))
         [A, b] = gauss_scalling(A, b, i)
-    x=solve(A,b)
+    x=solve(A,b) #solving triangular matrix.
     return x
 
 
