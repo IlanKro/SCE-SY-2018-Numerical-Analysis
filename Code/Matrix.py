@@ -18,6 +18,14 @@ class Matrix(object):
         self.b=b
         if b==0:
             self.b=np.array( [0.0 for i in range(len(A))])
+    def LU(self):
+        """
+            An algorithm to update the attributes of L,D,U  in case the attribute of A is changed.
+        """
+        self.diag()
+        self.upper()
+        self.lower()
+
     def diag(self):
         """
         Defines the diagonal(D) attribute of the matrix
@@ -91,6 +99,7 @@ class Matrix(object):
         Solves a matrix using gauss elemination method, prints the solution process
         :return: x a vector with the solutions for said matrix and solution vector
         """
+        [A,b]=self.mat,self.b
         def biggest_value_swap(A, b, i, j):
             def switch_lines(A, l1, l2):
                 B = np.identity(len(A))
@@ -126,12 +135,12 @@ class Matrix(object):
             matrix = [A, b]
             return matrix
 
-        for i in range(0, len(self.mat)):
-            print('A:\n{0},\nb:{1}'.format(self.mat, self.b))
-            [self.mat, self.b] = biggest_value_swap(self.mat, self.b, i, i)
-            print('A:\n{0},\nb:{1}'.format(self.mat, self.b))
-            [self.mat, self.b] = gauss_scalling(self.mat, self.b, i)
-        x = solve(self.mat, self.b)  # solving triangular matrix.
+        for i in range(0, len(A)):
+            print('A:\n{0},\nb:{1}'.format(A, b))
+            [A, b] = biggest_value_swap(A, b, i, i)
+            print('A:\n{0},\nb:{1}'.format(A, b))
+            [A, b] = gauss_scalling(A, b, i)
+        x = solve(A,b)  # solving triangular matrix.
         return x
     def iterative_convergence(self,x,xI,tolerance):
         """
@@ -141,6 +150,8 @@ class Matrix(object):
         :param tolerance: the tolerance factor of the iteration
         :return: True if the iterative loop ended in success, False rhe loop needs to keep going.
         """
+        if check_invertible() is False:
+            return
         diff1norm = 0.0
         oldnorm = 0.0
         for i in range(len(self.b)):
@@ -164,6 +175,7 @@ class Matrix(object):
         :return: either an error (in string) if something gone wrong an exception if the matrix ins't invertable,
         or the solution of the matrix and it's solution vector
         """
+        [A,b]=self.mat,self.b
         def gauss_seidel(self):
             G = (-1 * inv(self.D + self.L)).dot(self.U)
             print("G:", G)
@@ -205,6 +217,8 @@ class Matrix(object):
         :param tolerance: tolerance of solution the default is 0.0001
         :return: the solution to a matrix.
         """
+        if (check_invertible() is False):
+            return
         if (w<=0 or w>=2):
             return "Error, cannot initiate the function"
         x=np.zeros_like(self.b)
@@ -222,6 +236,10 @@ class Matrix(object):
             if x[0] > 10e+33:  # putting an upper limit so the loop doesn't go too high.. needlessly
                 return "does not converge"
         return "does not converge"
+
+
+A= Matrix([[1,2],[2,1]],[0,1])
+A.gauss_elemination()
 
 
 
