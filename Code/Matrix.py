@@ -136,11 +136,15 @@ class Matrix(object):
             return matrix
 
         for i in range(0, len(A)):
-            print('A:\n{0},\nb:{1}'.format(A, b))
-            [A, b] = biggest_value_swap(A, b, i, i)
-            print('A:\n{0},\nb:{1}'.format(A, b))
+            print('{2})A:\n{0},\nb:{1}'.format(A, b,i+1))
+            [Ai, b] = biggest_value_swap(A, b, i, i)
+            if  not np.array_equal(Ai, A): #So it doesn't print twice the same values
+                print(') A:\n{0},\nb:{1}'.format(Ai, b))
+            A = Ai
             [A, b] = gauss_scalling(A, b, i)
+        print("Took {0} iterations".format(i+1))
         x = solve(A,b)  # solving triangular matrix.
+        print ("The result after solving a triangular scaled Matrix:{0}".format(x))
         return x
     def iterative_convergence(self,x,xI,tolerance):
         """
@@ -150,7 +154,7 @@ class Matrix(object):
         :param tolerance: the tolerance factor of the iteration
         :return: True if the iterative loop ended in success, False rhe loop needs to keep going.
         """
-        if check_invertible() is False:
+        if Matrix.check_invertible(self) is False:
             return
         diff1norm = 0.0
         oldnorm = 0.0
@@ -217,7 +221,7 @@ class Matrix(object):
         :param tolerance: tolerance of solution the default is 0.0001
         :return: the solution to a matrix.
         """
-        if (check_invertible() is False):
+        if Matrix.check_invertible(self) is False:
             return
         if (w<=0 or w>=2):
             return "Error, cannot initiate the function"
@@ -240,6 +244,7 @@ class Matrix(object):
 
 A= Matrix([[1,2],[2,1]],[0,1])
 A.gauss_elemination()
+print (A.mat)
 
 
 
