@@ -129,7 +129,9 @@ class Matrix(object):
             index = i + 1
             while index < len(A):
                 multiplier = -1 * (A[index][i] / A[i][i])
-                A = elemental(index, i, len(A), multiplier).dot(A)
+		        elemental_mat=elemental(index, i, len(A), multiplier)
+		        print("elemental matrix:", elemental_mat)
+                A = elemental_mat.dot(A)
                 b[index] = b[index] + (multiplier * float(b[i]))
                 index = index + 1
             matrix = [A, b]
@@ -154,8 +156,6 @@ class Matrix(object):
         :param tolerance: the tolerance factor of the iteration
         :return: True if the iterative loop ended in success, False rhe loop needs to keep going.
         """
-        if Matrix.check_invertible(self) is False:
-            return
         diff1norm = 0.0
         oldnorm = 0.0
         for i in range(len(self.b)):
@@ -179,6 +179,8 @@ class Matrix(object):
         :return: either an error (in string) if something gone wrong an exception if the matrix ins't invertable,
         or the solution of the matrix and it's solution vector
         """
+        if Matrix.check_invertible(self) is False:
+            return
         [A,b]=self.mat,self.b
         def gauss_seidel(self):
             G = (-1 * inv(self.D + self.L)).dot(self.U)
