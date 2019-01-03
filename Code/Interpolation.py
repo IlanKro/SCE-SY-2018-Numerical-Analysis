@@ -12,7 +12,7 @@ def results_into_matrix(results):
         temp_deegre=deegre-1
         for j in range(len(results)):
             A[i][j]= results[i][0]**temp_deegre
-            print("a{2}*{0}^{1}".format(A[i][j],str(temp_deegre),j+1), end=" ")
+            print("a{2}*({0})^{1}".format(results[i][0],str(temp_deegre),j+1), end=" ")
             temp_deegre-=1
         print("\n")
         b[i]=results[i][1]

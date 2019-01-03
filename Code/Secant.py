@@ -22,16 +22,6 @@ def secant(f,xI,xI_1,amtIterations,eS):
     print("number of iterations:",count)
     return [xI , eA]
 
-def secant_UI(f):
-    """
-    A UI to let a user to use the secant function.
-    :param f: funtion in this procedure
-    :return: The error margin and the solution of said function using the secant methid
-    """
-    print("Enter your two guesses:")
-    xI = float(input("Guess 1:"))
-    xI_1 = float(input("Guess 2: "))
-    amtIterations = float(input("Enter the amount:"))
-    eS = float(input("Enter your pre-specified relative error of tolerance:"))
-    [x,error]=Secant(f,xI,XI_1,amtIterations,eS)
+print (secant(lambda x: pow(x,3) - 3*(x**2)+ x +1, -10,10,100,0.0001))
+
 
