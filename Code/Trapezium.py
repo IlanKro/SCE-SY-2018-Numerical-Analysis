@@ -19,6 +19,6 @@ def trapezium(f=lambda x:x,a=0,b=1,n=1000):
         integral+=fxi
 
     print("+ {})".format(f(b)))
-    return (h/2)*(integral + f(b))
+    return (h/2) * (integral + f(b))
 
 print(trapezium(lambda x:x**3,0,1,10000))
