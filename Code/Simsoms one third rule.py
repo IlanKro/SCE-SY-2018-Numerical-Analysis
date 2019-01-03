@@ -1,5 +1,5 @@
 
-
+from math import exp as e
 def simsoms_one_third(f=lambda x:x,a=-1,b=1,n=1000):
     """
     Calculates and prints the process of Simpson's one-third method for calculating an integral
@@ -13,17 +13,18 @@ def simsoms_one_third(f=lambda x:x,a=-1,b=1,n=1000):
         return (b - a) / n
     integral=f(a)
     h=delta_x(a,b,n)
-    print('{}/3 * ({}'.format(h,integral), end="")
+    print("h={}".format(h))
+    print('h/3 * ({}'.format(integral), end="")
     multiplier=2
     for i in range(1,n-1):
         fxi= multiplier*f(a+i*h)
-        print (" + {}*{} ".format(multiplier,fxi),end="")
+        print (" + {}*f({}) ".format(multiplier,a+i*h),end="")
         integral+=fxi
         multiplier= 4 if multiplier==2 else 2
-
     print("+ {})".format(f(b)))
     return (h/3)*(integral + f(b))
 
+print(simsoms_one_third(lambda x: x**3 + e(x),1,3,100))
 
 
 

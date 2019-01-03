@@ -15,10 +15,6 @@ def romberg(f=lambda x:x,a=0,b=1,max_steps=3):
     def sum_of_f(hi,i):
         return reduce(lambda x,y:x+y,(f(a + hi*(2*k-1)) for k in range(1,(2**(i-1))+1)))
 
-    #R=[[h(1)*(f(a)+f(b))]]
-    #n,m=1,1
-
-
     R=[[h(1)*(f(a)+f(b))]]
     i,j=1,0
     while max_steps>0:
@@ -38,4 +34,5 @@ def romberg(f=lambda x:x,a=0,b=1,max_steps=3):
     print(str(R).replace('],','\n').replace('[[',' ').replace('[','').replace(']',''))
     return R[i-1][j-1]
 
+print(romberg(lambda x: x**3 + 3*x, 0,1, 5))
 

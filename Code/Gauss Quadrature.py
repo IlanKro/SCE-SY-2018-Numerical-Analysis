@@ -18,3 +18,5 @@ def gauss_quadrature(f,n,b=1,a=-1):
     for c,xi in zip(weights,sample_points):
         print("{} * f({}) + ".format(c, xi), end="") if xi!=sample_points[-1] else print("{} * f({}))".format(c, xi))
     return ((b-a)/2)*sum((c*f(xi) for c,xi in zip(weights,sample_points))) # The calculation of the integral.
+
+print (gauss_quadrature(lambda x:x**2 - x,5, 10, -10))
