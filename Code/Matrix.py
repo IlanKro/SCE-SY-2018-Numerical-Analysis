@@ -129,11 +129,12 @@ class Matrix(object):
             index = i + 1
             while index < len(A):
                 multiplier = -1 * (A[index][i] / A[i][i])
-		        elemental_mat=elemental(index, i, len(A), multiplier)
-		        print("elemental matrix:", elemental_mat)
+                elemental_mat=elemental(index, i, len(A), multiplier)
+                print("elemental matrix:\n", elemental_mat)
                 A = elemental_mat.dot(A)
                 b[index] = b[index] + (multiplier * float(b[i]))
                 index = index + 1
+
             matrix = [A, b]
             return matrix
 
@@ -179,8 +180,8 @@ class Matrix(object):
         :return: either an error (in string) if something gone wrong an exception if the matrix ins't invertable,
         or the solution of the matrix and it's solution vector
         """
-        if Matrix.check_invertible(self) is False:
-            return
+        #if Matrix.check_invertible(self) is False:
+        #    return
         [A,b]=self.mat,self.b
         def gauss_seidel(self):
             G = (-1 * inv(self.D + self.L)).dot(self.U)
@@ -223,8 +224,7 @@ class Matrix(object):
         :param tolerance: tolerance of solution the default is 0.0001
         :return: the solution to a matrix.
         """
-        if Matrix.check_invertible(self) is False:
-            return
+
         if (w<=0 or w>=2):
             return "Error, cannot initiate the function"
         x=np.zeros_like(self.b)
@@ -244,10 +244,17 @@ class Matrix(object):
         return "does not converge"
 
 
-A= Matrix([[1,2],[2,1]],[0,1])
-A.gauss_elemination()
-print (A.mat)
+#A= Matrix([[ 1.,  1.,  1.],[ 9,  3,  1.],[25.,  5.,  1.]], [10.5,6.1,3.5])
+#print(A.cond())
+#A.gauss_elemination()
+#print (A.iterative("Gauss Seidel",100,0.00000001))
+#print (A.iterative("Jacobi"),100,0.000000001)
+#print(A.sor())
 
 
 
-
+B=Matrix([[ 0.0056096597622119024 ],[ 0.004124625086299176 ],[ 0.004124625086299176 ],[ 0.003184757038886121 ],
+[ 0.004124625086299176 ],[ 0.0056096597622119024 ],[ 0.003184757038886121 ],[ 0.004124625086299176 ],
+[ 0.004124625086299176 ],[ 0.003184757038886121 ],[ 0.0056096597622119024 ],[ 0.004124625086299176 ],
+[ 0.003184757038886121 ],[ 0.004124625086299176 ],[ 0.004124625086299176 ],[ 0.0056096597622119024 ]])
+print(B)
