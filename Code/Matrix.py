@@ -1,105 +1,102 @@
 import numpy as np
 from scipy.linalg import solve_triangular as solve
 from numpy.linalg import inv
+from functools import reduce
+
+
 class Matrix(object):
-    def __init__(self,A,b=0):
+    def __init__(self, A, b=0):
         """
         creates a matrix and a solution vector for it.
         :param A: The matrix to construct
         :param b: The solution vector by default the vector is a vector of 0's
         """
-        self.mat= np.array(A)
-        self.D = np.zeros_like(A)
-        self.diag()
-        self.U= np.zeros_like(A)
-        self.upper()
-        self.L= np.zeros_like(A)
-        self.lower()
-        self.b=b
-        if b==0:
-            self.b=np.array( [0.0 for i in range(len(A))])
-    def LU(self):
-        """
-            An algorithm to update the attributes of L,D,U  in case the attribute of A is changed.
-        """
-        self.diag()
-        self.upper()
-        self.lower()
+        self.mat = np.array(A)
+        self.b = np.array(0.0 for i in range(len(A))) if b == 0 else np.array(b)
 
-    def diag(self):
+    def __str__(self):
+        newstr = ''
+        for i in enumerate(self.mat):
+            newstr += str(i[1]).replace(']', '|{}]\n'.format(self.b[i[0]]))
+        return newstr
+
+    @property
+    def D(self):
         """
         Defines the diagonal(D) attribute of the matrix
         """
-        for i in range (len(self.mat)):
-            self.D[i][i]=self.mat[i][i]
-    def upper(self):
+        diag = np.zeros_like(self.mat)
+        for i in enumerate(self.mat):
+            diag[i[0]][i[0]] = self.mat[i[0]][i[0]]
+        return diag
+
+    @property
+    def U(self):
         """
         Defines the upper(U) attribute of the matrix
         """
-        for i in range(0,len(self.mat)):
-            for j in range (0,len(self.mat)):
-                if (i<j):
-                    self.U[i][j] = self.mat[i][j]
-    def lower(self):
+        upper = np.zeros_like(self.mat)
+        for i in enumerate(self.mat):
+            for j in enumerate(self.mat):
+                if i[0] < j[0]:
+                    upper[i[0]][j[0]] = self.mat[i[0]][j[0]]
+        return upper
+
+    @property
+    def L(self):
         """
         Defines the lower(L) attribute of the matrix
         """
-        for i in range(0,len(self.mat)):
-            for j in range (0,len(self.mat)):
-                if (i>j):
-                    self.L[i][j] = self.mat[i][j]
+        lower = np.zeros_like(self.mat)
+        for i in enumerate(self.mat):
+            for j in enumerate(self.mat):
+                if i[0] > j[0]:
+                    lower[i[0]][j[0]] = self.mat[i[0]][j[0]]
+        return lower
 
-    def check_invertible(self):
+    @staticmethod
+    def check_invertible(A):
         """
-            Checks the  matrix is invertible or not
+            Checks if a matrix is invertible or not
             :return: boolean:True if it's invertible or False if it's singular
         """
         try:
             inv(A)
-        except str:
+        except LinAlgError:
             return False
         return True
+
     def has_dominant_diag(self):
         """
         Checks if a matrix has a dominant diagonal
         :return: True if it does, False if it doesn't
         """
-        summ=0
-        current=0
-        for i in range(len(self.mat)):
-            for j in range(len(self.mat)):
-                if i==j:
-                    current=abs(self.mat[i][i])
-                else:
-                    summ+=abs(self.mat[i][j])
-            if (summ>current):
+        for i in enumerate(self.mat):
+            summ = reduce(lambda x, y: abs(x + y), i[1])
+            current = abs(i[1][i[0]])
+            summ -= current
+            if summ > current:
                 return False
-            summ=0
         return True
+
     def cond(self):
         """
         Calculates the cond(A) of a matrix the formula is: normal(A)*normal(A^-1)
         :return: The value of condition A the bigger this value the less accurate the matrix will be.
         """
-        def normal(A):
-            sum = 0
-            maxSum = 0
-            for i in A:
-                for j in i:
-                    sum += abs(j)
-                if sum > maxSum:
-                    maxSum = sum
-                sum = 0
-            return maxSum
-        print("the inverted matrix is:\n",inv(self.mat))
-        return normal(self.mat) * normal(inv(self.mat))
 
-    def gauss_elemination(self):
+        def normal(A):
+            return max(reduce(lambda x, y: abs(x + y), i) for i in A)
+
+        return normal(self.mat) * normal(inv(self.mat)) if Matrix.check_invertible(self.mat) else "can't be inverted"
+
+    def gauss_elemination(self, guess=[0, 0]):
         """
         Solves a matrix using gauss elemination method, prints the solution process
         :return: x a vector with the solutions for said matrix and solution vector
         """
-        [A,b]=self.mat,self.b
+        [A, b] = self.mat, self.b
+
         def biggest_value_swap(A, b, i, j):
             def switch_lines(A, l1, l2):
                 B = np.identity(len(A))
@@ -108,6 +105,7 @@ class Matrix(object):
                 B[l2][l2] = 0
                 B[l2][l1] = 1
                 return B.dot(A)
+
             maximum = A[i][j]
             index = i
             biggest_index = i
@@ -120,141 +118,134 @@ class Matrix(object):
                 return 'error'
             b[biggest_index], b[i] = b[i], b[biggest_index]
             return [switch_lines(A, i, biggest_index), b]
+
         def gauss_scalling(A, b, i):
             def elemental(i, j, n, val):
                 """Makes an elementary matrix in size of n*n"""
                 A = np.identity(n)
                 A[i][j] = val
                 return A
+
             index = i + 1
             while index < len(A):
                 multiplier = -1 * (A[index][i] / A[i][i])
-                elemental_mat=elemental(index, i, len(A), multiplier)
-                print("elemental matrix:\n", elemental_mat)
+                elemental_mat = elemental(index, i, len(A), multiplier)
+                print("elemental matrix:", elemental_mat)
                 A = elemental_mat.dot(A)
                 b[index] = b[index] + (multiplier * float(b[i]))
                 index = index + 1
+            return [A, b]
 
-            matrix = [A, b]
-            return matrix
-
-        for i in range(0, len(A)):
-            print('{2})A:\n{0},\nb:{1}'.format(A, b,i+1))
+        for i in range(len(A)):
+            print('{})A:\n{}b:{}'.format(i + 1, A, b))
             [Ai, b] = biggest_value_swap(A, b, i, i)
-            if  not np.array_equal(Ai, A): #So it doesn't print twice the same values
+            if not np.array_equal(Ai, A):  # So it doesn't print twice the same values
                 print(') A:\n{0},\nb:{1}'.format(Ai, b))
             A = Ai
             [A, b] = gauss_scalling(A, b, i)
-        print("Took {0} iterations".format(i+1))
-        x = solve(A,b)  # solving triangular matrix.
-        print ("The result after solving a triangular scaled Matrix:{0}".format(x))
+        print("Took {} iterations".format(i + 1))
+        x = solve(A, b)  # solving triangular matrix.
+        print("The result after solving a triangular scaled Matrix:{0}".format(x))
         return x
-    def iterative_convergence(self,x,xI,tolerance):
-        """
-        checks if a loop using a vector as result needs to end or not calculating if 2 vectors are close enough, using their normals.
-        :param x: Previous x (xr)
-        :param xI: new x (xr+1)
-        :param tolerance: the tolerance factor of the iteration
-        :return: True if the iterative loop ended in success, False rhe loop needs to keep going.
-        """
-        diff1norm = 0.0
-        oldnorm = 0.0
-        for i in range(len(self.b)):
-            diff1norm = diff1norm + abs(x[i] - xI[i])
-            oldnorm = oldnorm + abs(xI[i])
-        if oldnorm == 0.0:
-            oldnorm = 1.0
-        norm = diff1norm / oldnorm
-        if (norm < tolerance):
-            return True
-        return False
 
-
-    def iterative(self,method,max_iter=10000,tolerance=0.00001):
+    def jacobi(self, guess,max_itr=1000, tol=0.0001):
         """
-        Calculates a solution for a matrix and a solution vector using 2 methods
-        that can be choosen when the function is called
-        :param method: which method to use either "Jacobi" or "Gauss Seidel" are the only valid inputs
-        :param max_iter: max number of iterations the default is 10000
-        :param tolerance: tolerance of solution the default is 0.0001
-        :return: either an error (in string) if something gone wrong an exception if the matrix ins't invertable,
-        or the solution of the matrix and it's solution vector
+        "Jacobi's method: x[i](r+1)=b- sum((row members except i)*x[i](r)) i being the row, and r the guess number
+        :param guess: the initial guess for this iterative method
+        :param max_itr: max number of tolerable iterations (default 1000)
+        :param tol: tolerance of how close the results are
+        :return: the solution vector of the Matrix this method is used on.
         """
-        #if Matrix.check_invertible(self) is False:
-        #    return
-        [A,b]=self.mat,self.b
-        def gauss_seidel(self):
-            G = (-1 * inv(self.D + self.L)).dot(self.U)
-            print("G:", G)
-            H = inv(self.L + self.D)
-            print("H:", H)
-            return [G,H]
-        def Jacobi(self):
-            G =((-1 *inv(self.D)).dot(inv(self.L+self.U)))
-            print("G:", G)
-            H = inv(self.D)
-            print("H:", H)
-            return[G,H]
-        iteration_num = 0
-        x = np.zeros_like(self.b)
-        x[0]=1
-        if (method=="Jacobi"):
-            [G,H]=Jacobi(self)
-        elif (method == "Gauss Seidel"):
-            [G,H]=gauss_seidel(self)
-        else:
-            return "Wrong input"
-        xI=x
-        while (iteration_num!=max_iter):
-            xI= G.dot(x)+H.dot(self.b)
-            iteration_num += 1
-            print(iteration_num,")",x)
-            if (Matrix.iterative_convergence(self,x,xI,tolerance)):
-                print("number of Iterations:",(iteration_num))
+        x = guess
+        n = len(self.mat)
+        for k in range(max_itr):
+            print("iteration number {}:".format(k + 1))
+            old_x = x.copy()
+            for i in range(n):
+                sum1 = 0
+                for j in range(n):
+                    if (j!=i):
+                        sum1 += self.mat[i][j] * x[j]
+                print("x[{0}] = (1/{1})*({2} - {3})".format(i + 1, self.mat[i][i], self.b[i], sum1), end="")
+                x[i] = (1 / self.mat[i][i]) * (self.b[i] - sum1)
+                print(" = {0}".format(x[i]))
+            if len(list("ok" for index in range(n) if abs(x[index] - old_x[index]) < tol)) == n:
+                print("took {} iterations".format(k + 1))
                 return x
-            x = xI
-            if x[0]>10e+33: #putting an upper limit so the solution doesn't go too high..
-                return "does not converge"
-        return "does not converge"
+        print("The method didn't converge after {} iterations".format(max_itr))
+        return x
 
-    def sor(self,w=1.5,max_iter=1000,tolerance=0.00001):
+    def gauss_seidel(self, guess,max_itr=1000,tol=0.0001):
         """
-        :param w: a variable between 0 and 2 (default is 1.5)
-        :param  max_iter maximum iterations the code can go up to 1000 by default.
-        :param tolerance: tolerance of solution the default is 0.0001
-        :return: the solution to a matrix.
+        Gauss_seidel's method: x[i](r+1)= b- sum((row members until i)*x[i](r+1))-sum((row  after i)*x[i](r)
+        i being the row, and r the guess number
+        :param guess: the initial guess for this iterative method
+        :param max_itr: max number of tolerable iterations (default 1000)
+        :param tol: tolerance of how close the results are
+        :return: the solution vector of the Matrix this method is used on.
         """
+        x = guess
+        n = len(self.mat)
+        for k in range(max_itr):
+            print("iteration number {}:".format(k+1))
+            old_x=x.copy()
+            for i in range(n):
+                sum1 = 0
+                for j in range(i):
+                    sum1 += self.mat[i][j] * x[j]
+                sum2 = 0
+                for j in range(n - 1, i, -1):
+                    sum2 += self.mat[i][j] * x[j]
+                print("x[{0}] = (1/{1})*({2} - {3} - {4})".format(i + 1, self.mat[i][i], self.b[i], sum1, sum2), end="")
+                x[i] = (1 / self.mat[i][i]) * (self.b[i] - sum1 - sum2)
+                print(" = {0}".format(x[i]))
+            if len(list("ok" for index in range(n) if abs(x[index] - old_x[index]) < tol)) == n:
+                print("took {} iterations".format(k+1))
+                return x
+        print("The method didn't converge after {} iterations".format(max_itr))
+        return x
 
+    def sor(self,w, guess,max_itr=1000,tol=0.00001):
+        """
+            A variation of Gauss Seidel method that uses a w constant in a a way that would make the
+            main diagonal of the matrix a dominant diagonal for faster convention.
+            w should be a number between 0 and 2 (not including)
+            if w is 1 this methoid is essentially the same as gauss seidel method
+            :param w: the constant on which this method is based should be between 0 and 2 not including.
+            :param guess: the initial guess for this iterative method
+            :param max_itr: max number of tolerable iterations (default 1000)
+            :param tol: tolerance of how close the results are
+            :return: the solution vector of the Matrix this method is used on.
+        """
         if (w<=0 or w>=2):
-            return "Error, cannot initiate the function"
-        x=np.zeros_like(self.b)
-        x[0]=5  #don't want the initial vector to be all 0's but the actual guess doesn't matter much.
-        xI=x
-        iteration_num=0
-        while(iteration_num!=max_iter):
-            iteration_num+=1
-            xI=(inv((self.D + w*self.L)).dot((1-w)*self.D - w * self.U)).dot(x) + (w * inv((self.D + w*self.L)).dot(self.b))#the sor formula
-            print(iteration_num, ")", x)
-            if (Matrix.iterative_convergence(self,x, xI, tolerance)):
-                print("number of Iterations:", (iteration_num))
+            return "w out of range"
+        a=self.D +w*self.L
+        b=w*self.b
+        c=w*self.U + (1-w)* self.D
+        print ("SOR of this equation list can be represented as:\n{}x={}-{}x".format(a,b,c))
+        x = guess
+        n = len(self.mat)
+        for k in range(max_itr):
+            print("iteration number {}:".format(k + 1))
+            old_x = x.copy()
+            for i in range(n):
+                sum1 = 0
+                for j in range(i):
+                    sum1 += self.mat[i][j] * x[j]
+                sum2 = 0
+                for j in range(n - 1, i, -1):
+                    sum2 += self.mat[i][j] * x[j]
+                print("x[{0}] = (1-{5})*x[{0}] ({5}/{1})*({2} - {3} - {4})".format(i + 1, self.mat[i][i], self.b[i], sum1, sum2,w), end="")
+                x[i] = (1-w)*x[i] + (w / self.mat[i][i]) * (self.b[i] - sum1 - sum2)
+                print(" = {0}".format(x[i]))
+            if len(list("ok" for index in range(n) if abs(x[index] - old_x[index])<tol))==n:
+                print("took {} iterations".format(k + 1))
                 return x
-            x = xI
-            if x[0] > 10e+33:  # putting an upper limit so the loop doesn't go too high.. needlessly
-                return "does not converge"
-        return "does not converge"
+        print("The method didn't converge after {} iterations".format(max_itr))
+        return x
 
-
-#A= Matrix([[ 1.,  1.,  1.],[ 9,  3,  1.],[25.,  5.,  1.]], [10.5,6.1,3.5])
-#print(A.cond())
-#A.gauss_elemination()
-#print (A.iterative("Gauss Seidel",100,0.00000001))
-#print (A.iterative("Jacobi"),100,0.000000001)
-#print(A.sor())
-
-
-
-B=Matrix([[ 0.0056096597622119024 ],[ 0.004124625086299176 ],[ 0.004124625086299176 ],[ 0.003184757038886121 ],
-[ 0.004124625086299176 ],[ 0.0056096597622119024 ],[ 0.003184757038886121 ],[ 0.004124625086299176 ],
-[ 0.004124625086299176 ],[ 0.003184757038886121 ],[ 0.0056096597622119024 ],[ 0.004124625086299176 ],
-[ 0.003184757038886121 ],[ 0.004124625086299176 ],[ 0.004124625086299176 ],[ 0.0056096597622119024 ]])
-print(B)
+B = Matrix([[16, 3], [7, 11]], (11, 13))
+print (list(i for i in range(3) if 1-1<2))
+print(B.gauss_seidel([1, 2]))
+print(B.jacobi([1, 2]))
+print(B.sor(1.15,[1,2],100))
