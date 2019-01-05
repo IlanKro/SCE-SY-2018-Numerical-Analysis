@@ -87,7 +87,6 @@ class Matrix(object):
 
         def normal(A):
             return max(reduce(lambda x, y: abs(x + y), i) for i in A)
-
         return normal(self.mat) * normal(inv(self.mat)) if Matrix.check_invertible(self.mat) else "can't be inverted"
 
     def gauss_elemination(self, guess=[0, 0]):
@@ -96,7 +95,6 @@ class Matrix(object):
         :return: x a vector with the solutions for said matrix and solution vector
         """
         [A, b] = self.mat, self.b
-
         def biggest_value_swap(A, b, i, j):
             def switch_lines(A, l1, l2):
                 B = np.identity(len(A))
@@ -166,7 +164,7 @@ class Matrix(object):
                 for j in range(n):
                     if (j!=i):
                         sum1 += self.mat[i][j] * x[j]
-                print("x[{0}] = (1/{1})*({2} - {3})".format(i + 1, self.mat[i][i], self.b[i], sum1), end="")
+                print("x[{0}] = (1/{1})*({2} - {3})".format(i + 1, self.mat[i][i], self.b[i], sum1), end="" )
                 x[i] = (1 / self.mat[i][i]) * (self.b[i] - sum1)
                 print(" = {0}".format(x[i]))
             if len(list("ok" for index in range(n) if abs(x[index] - old_x[index]) < tol)) == n:
